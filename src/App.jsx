@@ -1,15 +1,19 @@
-import { useState,useEffect } from "react";
-import InputBox from "./components/TodoForm";
+import { useState, useEffect } from "react";
 import { TodoContextProvider } from "./context/TodoContect";
-import TodoItem from "./components/TodoItem";
+import {
+  SortBtns,
+  TaskCompleted,
+  TodoForm,
+  TodoItem,
+} from "./components/index";
 
 function App() {
-  const [ToDos, setToDos] = useState(
-    JSON.parse(localStorage.getItem("toDos")) || []
-  );
+  const [ToDos, setToDos] = useState([]);
+  const [sortedTodos, setSortedTodos] = useState([]);
+  const [sortBy, setSortBy] = useState("");
+
   const createTodo = (todo) => {
     setToDos((prev) => [...prev, todo]);
-    console.log("hi");
   };
   const deleteTodo = (id) => {
     setToDos((prev) => prev.filter((prevTodo) => prevTodo.id !== id));
@@ -32,32 +36,61 @@ function App() {
   // Load from localStorage
   useEffect(() => {
     const ToDos = JSON.parse(localStorage.getItem("ToDos"));
-    if (ToDos && ToDos.length > 0) setToDos(ToDos);
+    if (ToDos && ToDos.length > 0) {
+      setToDos(ToDos);
+    }
   }, []);
 
   // Save to localStorage
   useEffect(() => {
     localStorage.setItem("ToDos", JSON.stringify(ToDos));
+    setSortedTodos(ToDos);
   }, [ToDos]);
 
+  useEffect(() => {
+    if (sortBy && sortBy === "Completed")
+      setSortedTodos(ToDos.filter((todo) => todo.isCompleted));
+    else if (sortBy && sortBy === "Active")
+      setSortedTodos(ToDos.filter((todo) => !todo.isCompleted));
+    else setSortedTodos([...ToDos]);
+  }, [ToDos, sortBy]);
+
+  const value = {
+    ToDos,
+    setToDos,
+    createTodo,
+    editTodo,
+    deleteTodo,
+    toggleCompleted,
+  };
+
   return (
-    <TodoContextProvider
-      value={{ ToDos, createTodo, editTodo, deleteTodo, toggleCompleted }}
-    >
+    <TodoContextProvider value={value}>
       <div className="bg-[#172842] min-h-screen py-8">
         <div className="w-full max-w-2xl mx-auto rounded-lg px-4 py-3 text-white">
           <h1 className="text-2xl font-bold text-center mb-8 mt-2">
             Manage Your Todos
           </h1>
+          {/* Todo form goes here */}
           <div className="mb-4">
-            {/* Todo form goes here */}
-            <InputBox />
+            <TodoForm />
           </div>
-          <div className="flex flex-wrap gap-y-3">
+
+          {/* Sort btns */}
+          <div>
+            <SortBtns setSortBy={setSortBy} sortBy={sortBy} />
+          </div>
+
+          <div className="flex flex-col gap-y-3 mt-7">
+            {/*Completed Tasks OverView */}
+            <TaskCompleted />
             {/*Loop and Add TodoItem here */}
-            {ToDos.map((todo) => (
-              <TodoItem key={todo.id} todo={todo} />
-            ))}
+
+            {sortedTodos && sortedTodos.length > 0 ? (
+              sortedTodos.map((todo) => <TodoItem key={todo.id} todo={todo} />)
+            ) : (
+              <p className="text-center">No Todos are available.</p>
+            )}
           </div>
         </div>
       </div>
