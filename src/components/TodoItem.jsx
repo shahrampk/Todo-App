@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useTodo } from "../context/TodoContect";
 
 function TodoItem({ todo }) {
+  const inputRef = useRef(null);
   const { editTodo, deleteTodo, toggleCompleted } = useTodo();
   const [isTodoEditable, setIsTodoEditable] = useState(false);
   const [todoMsg, setTodoMsg] = useState(todo.task);
@@ -20,12 +21,14 @@ function TodoItem({ todo }) {
       />
       <input
         type="text"
+        ref={inputRef}
         className={`border outline-none w-full bg-transparent rounded-lg
           ${isTodoEditable ? "border-black/10 px-2" : "border-transparent"} 
           ${todo.isCompleted ? "line-through" : ""}`}
         value={todoMsg}
         onChange={(e) => setTodoMsg(e.target.value)}
         readOnly={!isTodoEditable}
+        title={todo.title}
       />
       {/* Edit, Save Button */}
       <button
@@ -34,9 +37,10 @@ function TodoItem({ todo }) {
         }`}
         onClick={() => {
           if (todo.isCompleted) return;
+          inputRef.current.focus();
 
           if (isTodoEditable) {
-            editTodo({ ...todo, todo: todoMsg }, todo.id);
+            editTodo({ ...todo, task: todoMsg }, todo.id);
             setIsTodoEditable(false);
           } else {
             setIsTodoEditable(true);

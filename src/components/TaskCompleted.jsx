@@ -14,7 +14,7 @@ const TaskCompleted = () => {
   return (
     <>
       <p className="text-lg ml-2 font-medium">
-        <span>{completedTaskNum}</span> of <span>{ToDos.length}</span> tasks completed
+        <span>{completedTaskNum}</span> of <span>{ToDos.length}</span> todos completed
       </p>
     </>
   );
